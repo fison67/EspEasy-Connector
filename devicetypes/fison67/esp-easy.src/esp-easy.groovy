@@ -1,30 +1,19 @@
 /**
- *  ESP Easy DTH (v.0.0.1)
+ *  ESP Easy DTH (v.0.0.2)
  *
- * MIT License
+ *  Authors
+ *   - fison67@nate.com
+ *  Copyright 2018
  *
- * Copyright (c) 2018 fison67@nate.com
+ *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License. You may obtain a copy of the License at:
  *
- * Permission is hereby granted, free of charge, to any person
- * obtaining a copy of this software and associated documentation
- * files (the "Software"), to deal in the Software without
- * restriction, including without limitation the rights to use,
- * copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the
- * Software is furnished to do so, subject to the following
- * conditions:
- * 
- * The above copyright notice and this permission notice shall be
- * included in all copies or substantial portions of the Software.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
- * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
- * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
- * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
- * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
- * OTHER DEALINGS IN THE SOFTWARE.
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
+ *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
+ *  for the specific language governing permissions and limitations under the License.
+ *
  */
  
 import groovy.json.JsonSlurper
@@ -32,6 +21,11 @@ import groovy.json.JsonSlurper
 metadata {
 	definition (name: "ESP Easy", namespace: "fison67", author: "fison67") {
         capability "Sensor"
+        capability "Temperature Measurement"
+        capability "Relative Humidity Measurement"
+        capability "Illuminance Measurement"
+        capability "Carbon Dioxide Measurement"
+        capability "Refresh"
         
 		attribute "value1", "number"
 		attribute "value2", "number"
@@ -40,13 +34,16 @@ metadata {
         attribute "lastCheckinDate", "date"
         
         command "setData"
-        command "refresh"
         command "timerLoop"
         command "setEspName"
 	}
 
-
 	simulator {
+	}
+    
+	preferences {
+		input name: "autorefresh", title:"Select a auto refresh" , type: "enum", required: true, options: ["ON", "OFF"], defaultValue: "OFF", description:"DTH Auto refresh ON/OFF"
+        
 	}
 
 	tiles(scale: 2) {
@@ -122,7 +119,43 @@ metadata {
 
 // parse events into attributes
 def parse(String description) {
-	log.debug "Parsing '${description}'"
+    def msg = parseLanMessage(description)
+    
+    def desc = msg.headers.toString()
+    
+    def content
+    def temp = msg.headers.toString().split(" ")
+    for(def i=0; i<temp.length; i++){
+    	if(temp[i].contains("demo.php")){
+        	content = temp[i].split("\\?")[1]
+            break
+        }
+    }
+    
+    Map<String, Integer> map = new HashMap<String, Integer>();
+    for(final String entry : content.split("&")) {
+        final String[] parts = entry.split("\\=");
+        if(parts.length > 1){
+       	 map.put(parts[0], parts[1]);
+        }
+    }
+    
+    log.debug map
+    
+    def name = map.valuename.toLowerCase()
+    def value = map.value
+	if(name == "temperature"){
+        sendEvent(name:"temperature", value: value as double, unit: "C")
+    }else if(name == "humidity"){
+        sendEvent(name:"humidity", value: value as double, unit: "%")
+    }else if(name == "illuminance"){
+        sendEvent(name:"illuminance", value: value as int) 
+    }else if(name == "ppm"){
+        sendEvent(name:"carbonDioxide", value: value as double)
+    }
+    
+    def count = state['unique_' + name]
+    sendEvent(name: "status${count}", value: value, displayed: false)
 }
 
 def setUrl(String url){
@@ -131,7 +164,8 @@ def setUrl(String url){
     state.lastTime = new Date().getTime()
     
     state.timeSecond = 5
-    timerLoop()
+//    timerLoop()
+	refresh()
 }
 
 def setEspName(name){
@@ -140,26 +174,36 @@ def setEspName(name){
 }
 
 def setData(data){
-	log.debug "SetData >> ${state._name}"
- //   log.debug "DATA >> ${data}"
+
 	state._data = data
     
     try{
     
     	def count = 1
         data.each{item->
-        //	log.debug item
-            
+        
             if(item.TaskName == state._name){
             	item.each{ key,value->
                     if(key == "TaskValues"){
                         value.each{ obj ->
+                        	key = ""
                             obj.each{ subKey, subValue ->
-                     //       	log.debug subKey + " >> " + subValue
+                            //	log.debug subKey + " >> " + subValue
                                 if(subKey == "Name"){
                                     sendEvent(name: "status${count}_name", value: subValue)
+                        			key = subValue
                                 }else if(subKey == "Value"){
-                                    sendEvent(name: "status${count}", value: subValue)
+                                	state['unique_' + key.toLowerCase()] = count
+                                	if(key.toLowerCase() == "temperature"){
+    									sendEvent(name:"temperature", value: subValue, unit: "C")
+                                    }else if(key.toLowerCase() == "humidity"){
+    									sendEvent(name:"humidity", value: subValue, unit: "%")
+                                    }else if(key.toLowerCase() == "illuminance"){
+    									sendEvent(name:"illuminance", value: subValue)
+                                    }else if(key.toLowerCase() == "ppm"){
+    									sendEvent(name:"carbonDioxide", value: subValue)
+                                    }
+                                    sendEvent(name: "status${count}", value: subValue, displayed: false)
                                 }
                             }
                             count += 1
@@ -171,16 +215,38 @@ def setData(data){
 
         def now = new Date()
         state.lastTime = now.getTime()
-        sendEvent(name: "lastCheckinDate", value: now)
+        sendEvent(name: "lastCheckinDate", value: now, displayed: false)
     }catch(e){
     	log.error "Error!!! ${e}"
     }
 }
 
+def setAutoRefresh(mode){
+    state.autorefresh = mode
+}
+
+def updated(){
+	unschedule()
+    state.autorefresh = settings.autorefresh
+    
+	if(state.autorefresh == "ON"){
+    	timerLoop()
+        log.debug "Auto Refresh ON"
+    }else{
+        log.debug "Auto Refresh OFF"
+		refresh()
+	}
+}
+
+def refresh(){
+	getStatusOfESPEasy()
+}
 
 def timerLoop(){
-	getStatusOfESPEasy()    
-	startTimer(state.timeSecond.toInteger(), timerLoop)
+	if(state.autorefresh == "ON"){
+        getStatusOfESPEasy()    
+        startTimer(state.timeSecond.toInteger(), timerLoop)
+    }
 }
 
 def startTimer(seconds, function) {
