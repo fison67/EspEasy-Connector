@@ -1,30 +1,18 @@
 /**
- *  ESP Easy Connector (v.0.0.1)
+ *  ESP Easy Connector (v.0.0.2)
  *
- * MIT License
+ *  Authors
+ *   - fison67@nate.com
+ *  Copyright 2018
  *
- * Copyright (c) 2018 fison67@nate.com
+ *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License. You may obtain a copy of the License at:
  *
- * Permission is hereby granted, free of charge, to any person
- * obtaining a copy of this software and associated documentation
- * files (the "Software"), to deal in the Software without
- * restriction, including without limitation the rights to use,
- * copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the
- * Software is furnished to do so, subject to the following
- * conditions:
- * 
- * The above copyright notice and this permission notice shall be
- * included in all copies or substantial portions of the Software.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
- * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
- * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
- * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
- * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
- * OTHER DEALINGS IN THE SOFTWARE.
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
+ *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
+ *  for the specific language governing permissions and limitations under the License.
  */
  
 import groovy.json.*
@@ -56,7 +44,7 @@ def mainPage() {
     
 	dynamicPage(name: "mainPage", title: "Manage your ESP Easy Devices", nextPage: null, uninstall: true, install: true) {
         section("Configure"){
-           href "findPage", title:"Find Devices & Add Automatically", description:""
+        //   href "findPage", title:"Find Devices & Add Automatically", description:""
            href "addPage", title:"Add Device Manually", description:""
         }
     }
@@ -78,7 +66,8 @@ def addPage(){
     state.mode = "manual"
 	dynamicPage(name:"addPage", title:"Add Page", nextPage: "donePage") {
 		section("Fill the blank") {
-        	input "devAddress", "string", title: "Address of ESP Easy", required: true
+        	input "devAddress", "string", title: "IP Address of ESP Easy", required: true
+        	input "devAutoRefreshMode", "enum", title: "Auto Refresh Mode?", required: true, options: ["ON", "OFF"], description: "ON : DTH directly requests data.\nOFF : DTH is just receive data from Esp Easy"
         }
 	}
 }
@@ -136,11 +125,12 @@ def findDeviceCallback(physicalgraph.device.HubResponse hubResponse){
         
         def jsonObj = msg.json
         log.debug jsonObj
-        
+        def macAddr = jsonObj['WiFi']['MAC address']
         jsonObj.Sensors.each{ item->
         	def name = item.TaskName
             
-            def dni = "esp-connector-" + name.toLowerCase()
+        //    def dni = "esp-connector-" + name.toLowerCase()
+            def dni = macAddr.replaceAll(":", "").replaceAll("-", "").toUpperCase()
             if(!getChildDevice(dni)){
                 try{
                     def childDevice = addChildDevice("fison67", "ESP Easy", dni, location.hubs[0].id, [
@@ -148,8 +138,11 @@ def findDeviceCallback(physicalgraph.device.HubResponse hubResponse){
                     ])
                     def addr = state.mode == "auto" ? state.findAddress : settings.devAddress
             		log.debug "Name >> " + name
+                    
                     childDevice.setUrl(addr)
                     childDevice.setEspName(name)
+                    childDevice.setAutoRefresh(settings.devAutoRefreshMode)
+                    
                     state.addedCountNow = (state.addedCountNow.toInteger() + 1)
                     log.debug "ADD >> ${name}, addr=${addr}"
                     state.done = "Finsihed"
