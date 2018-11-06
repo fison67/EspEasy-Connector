@@ -110,12 +110,44 @@ metadata {
                 ]
             )
         }
+        standardTile("status5_name", "device.status5_name", width: 3, height: 1) {
+            state "name", label: '${currentValue}',  backgroundColor: "#ffffff"
+        }
+        standardTile("status6_name", "device.status6_name", width: 3, height: 1) {
+            state "name", label: '${currentValue}',  backgroundColor: "#ffffff"
+        }
+    	valueTile("status5", "device.status5", width: 3, height: 3) {
+            state("val", label:'${currentValue}', defaultState: true, 
+            	backgroundColors:[
+                    [value: 31, color: "#153591"],
+                    [value: 44, color: "#1e9cbb"],
+                    [value: 59, color: "#90d2a7"],
+                    [value: 74, color: "#44b621"],
+                    [value: 84, color: "#f1d801"],
+                    [value: 95, color: "#d04e00"],
+                    [value: 96, color: "#bc2323"]
+                ]
+            )
+        }
+        valueTile("status6", "device.status6", width: 3, height: 3) {
+            state("val", label:'${currentValue}', defaultState: true, 
+            	backgroundColors:[
+                    [value: 31, color: "#153591"],
+                    [value: 44, color: "#1e9cbb"],
+                    [value: 59, color: "#90d2a7"],
+                    [value: 74, color: "#44b621"],
+                    [value: 84, color: "#f1d801"],
+                    [value: 95, color: "#d04e00"],
+                    [value: 96, color: "#bc2323"]
+                ]
+            )
+        }
         valueTile("lastCheckinDate", "device.lastCheckinDate", width: 5, height: 1) {
             state "name", label: 'Last Updated : ${currentValue}',  backgroundColor: "#ffffff"
         }
        
        	main (["status1","status2"])
-      	details(["status1_name","status2_name","status1","status2","status3_name","status4_name","status3","status4", "lastCheckinDate"])
+      	details(["status1_name","status2_name","status1","status2","status3_name","status4_name","status3","status4", "status5_name","status6_name","status5","status6", "lastCheckinDate"])
 	}
 }
 
@@ -186,7 +218,7 @@ def setData(data){
     	def count = 1
         data.each{item->
         
-            if(item.TaskName == state._name){
+        //    if(item.TaskName == state._name){
             	item.each{ key,value->
                     if(key == "TaskValues"){
                         value.each{ obj ->
@@ -214,7 +246,7 @@ def setData(data){
                         }
                     }
                 }
-            }
+          //  }
         }
 
         updateLastTime()
