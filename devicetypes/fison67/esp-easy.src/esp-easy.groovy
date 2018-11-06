@@ -110,9 +110,12 @@ metadata {
                 ]
             )
         }
+        valueTile("lastCheckinDate", "device.lastCheckinDate", width: 5, height: 1) {
+            state "name", label: 'Last Updated : ${currentValue}',  backgroundColor: "#ffffff"
+        }
        
        	main (["status1","status2"])
-      	details(["status1_name","status2_name","status1","status2","status3_name","status4_name","status3","status4"])
+      	details(["status1_name","status2_name","status1","status2","status3_name","status4_name","status3","status4", "lastCheckinDate"])
 	}
 }
 
@@ -155,6 +158,8 @@ def parse(String description) {
     
     def count = state['unique_' + name]
     sendEvent(name: "status${count}", value: value, displayed: false)
+    
+    updateLastTime()
 }
 
 def setUrl(String url){
@@ -212,9 +217,7 @@ def setData(data){
             }
         }
 
-        def now = new Date()
-        state.lastTime = now.getTime()
-        sendEvent(name: "lastCheckinDate", value: now, displayed: false)
+        updateLastTime()
     }catch(e){
     	log.error "Error!!! ${e}"
     }
@@ -289,4 +292,9 @@ def getStatusOfESPEasy() {
     }catch(e){
     	log.error "Error!!! ${e}"
     }
+}
+
+def updateLastTime(){
+	def now = new Date().format("yyyy-MM-dd HH:mm:ss", location.timeZone)
+    sendEvent(name: "lastCheckinDate", value: now, displayed:false)
 }
