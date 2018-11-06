@@ -42,8 +42,7 @@ metadata {
 	}
     
 	preferences {
-		input name: "autorefresh", title:"Select a auto refresh" , type: "enum", required: true, options: ["ON", "OFF"], defaultValue: "OFF", description:"DTH Auto refresh ON/OFF"
-        
+		input name: "autorefresh", title:"Select a auto refresh" , type: "enum", required: true, options: ["ON", "OFF"], defaultValue: "OFF", description:"DTH Auto refresh ON/OFF"      
 	}
 
 	tiles(scale: 2) {
@@ -271,10 +270,10 @@ def getStatusOfESPEasy() {
     	def timeGap = new Date().getTime() - Long.valueOf(state.lastTime)
         if(timeGap > 1000 * 60){
             log.warn "ESP Easy device is not connected..."
-            sendEvent(name: "status1", value: -1)
-            sendEvent(name: "status2", value: -1)
-            sendEvent(name: "status3", value: -1)
-            sendEvent(name: "status4", value: -1)
+       //     sendEvent(name: "status1", value: -1)
+        //    sendEvent(name: "status2", value: -1)
+        //    sendEvent(name: "status3", value: -1)
+        //    sendEvent(name: "status4", value: -1)
         }
 		log.debug "Try to get data from ${state.address}"
         def options = [
