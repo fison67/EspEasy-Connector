@@ -52,8 +52,10 @@ Enable [Enabled] check box.
 
 <br/><br/>
 ## Mode
-Auto Refresh On : Smartthings DTH is getting status of ESP EASY by scheduling.<br/>
-                  Disable [Enabled] on Controller tab of ESP EASY. <br/>
+#### Auto Refresh On
+Smartthings DTH is getting status of ESP EASY by scheduling.<br/>
+Disable [Enabled] on Controller tab of ESP EASY. <br/>
 <br/>
-Auto Refresh Off : ESP EASY send to status Smartthings Hub.<br/>
-                  Enable [Enabled] on Controller tab of ESP EASY. <br/>
+#### Auto Refresh Off 
+ESP EASY send to status Smartthings Hub.<br/>
+Enable [Enabled] on Controller tab of ESP EASY. <br/>
