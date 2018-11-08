@@ -1,6 +1,7 @@
 # EspEasy-Connector
 Connector for EspEasy with Smartthings
 
+<br/><br/>
 
 ## Install DTH<br/>
 ```
@@ -20,6 +21,7 @@ Click From Code
 Copy content of mi_connector.groovy & Paste
 Click Create
 ```
+<br/><br/>
 
 ## Setup Esp Easy
 ```
@@ -35,6 +37,7 @@ Set Controller IP to your Smartthings Hub IP.
 Set Controller Port to 39500
 Enable [Enabled] check box.
 ```
+<br/><br/>
 
 <img src="./images/devices.png" title="#ESP Easy#1" width="600px">
 <img src="./images/values.png" title="#ESP Easy#2" width="600px">
@@ -47,6 +50,7 @@ Enable [Enabled] check box.
 <img src="./images/right now.png" title="#DTH" width="400px">
 <img src="./images/recently.png" title="#DTH" width="400px">
 
+<br/><br/>
 ## Mode
 Auto Refresh On : Smartthings DTH is getting status of ESP EASY by scheduling.
                   Disable [Enabled] on Controller tab of ESP EASY. 
