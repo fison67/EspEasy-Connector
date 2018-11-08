@@ -1,5 +1,5 @@
 /**
- *  ESP Easy DTH (v.0.0.2)
+ *  ESP Easy DTH (v.0.0.3)
  *
  *  Authors
  *   - fison67@nate.com
@@ -25,6 +25,8 @@ metadata {
         capability "Relative Humidity Measurement"
         capability "Illuminance Measurement"
         capability "Carbon Dioxide Measurement"
+        capability "Dust Sensor"
+        capability "Color Temperature"
         capability "Refresh"
         
 		attribute "value1", "number"
@@ -182,10 +184,14 @@ def parse(String description) {
         sendEvent(name:"temperature", value: value as double, unit: "C")
     }else if(name == "humidity"){
         sendEvent(name:"humidity", value: value as double, unit: "%")
-    }else if(name == "illuminance"){
+    }else if(name == "lux"){
         sendEvent(name:"illuminance", value: value as int) 
     }else if(name == "ppm"){
         sendEvent(name:"carbonDioxide", value: value as double)
+    }else if(name == "dust"){
+    	sendEvent(name:"fineDustLevel", value: value as int)
+    }else if(name == "color temperature"){
+    	sendEvent(name:"colorTemperature", value: value as int)
     }
     
     def count = state['unique_' + name]
@@ -234,10 +240,14 @@ def setData(data){
     									sendEvent(name:"temperature", value: subValue, unit: "C")
                                     }else if(key.toLowerCase() == "humidity"){
     									sendEvent(name:"humidity", value: subValue, unit: "%")
-                                    }else if(key.toLowerCase() == "illuminance"){
+                                    }else if(key.toLowerCase() == "lux"){
     									sendEvent(name:"illuminance", value: subValue)
                                     }else if(key.toLowerCase() == "ppm"){
     									sendEvent(name:"carbonDioxide", value: subValue)
+                                    }else if(key.toLowerCase() == "dust"){
+                                        sendEvent(name:"fineDustLevel", value: subValue)
+                                    }else if(key.toLowerCase() == "color temperature"){
+                                        sendEvent(name:"colorTemperature", value: subValue)
                                     }
                                     sendEvent(name: "status${count}", value: subValue, displayed: false)
                                 }
