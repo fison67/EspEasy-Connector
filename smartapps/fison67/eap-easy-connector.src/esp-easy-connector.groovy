@@ -18,7 +18,7 @@
 import groovy.json.JsonSlurper
 
 definition(
-    name: "ESP Easy Connector",
+    name: "ESPEasy Connector",
     namespace: "fison67",
     author: "fison67",
     description: "A Connector between ESP Easy and ST",
