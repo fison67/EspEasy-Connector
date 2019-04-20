@@ -124,7 +124,7 @@ def findDeviceCallback(physicalgraph.device.HubResponse hubResponse){
         
         def jsonObj = msg.json
         log.debug jsonObj
-        def macAddr = jsonObj['WiFi']['MAC address']
+        def macAddr = jsonObj['WiFi']['STA MAC']
         jsonObj.Sensors.each{ item->
         	def name = item.TaskName
             
