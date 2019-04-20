@@ -41,7 +41,7 @@ def mainPage() {
 	state.addedCountNow = 0
     state.findAddressLastNumber = 1
     
-	dynamicPage(name: "mainPage", title: "Manage your ESP Easy Devices", nextPage: null, uninstall: true, install: true) {
+	dynamicPage(name: "mainPage", title: "Manage your ESP Easy Devices", uninstall: true, install: true) {
         section("Configure"){
         //   href "findPage", title:"Find Devices & Add Automatically", description:""
            href "addPage", title:"Add Device Manually", description:""
