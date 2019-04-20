@@ -15,7 +15,7 @@
  *  for the specific language governing permissions and limitations under the License.
  */
  
-import groovy.json.*
+import groovy.json.JsonSlurper
 
 definition(
     name: "ESP Easy Connector",
@@ -39,7 +39,6 @@ preferences {
 
 def mainPage() {
 	state.addedCountNow = 0
-    
     state.findAddressLastNumber = 1
     
 	dynamicPage(name: "mainPage", title: "Manage your ESP Easy Devices", nextPage: null, uninstall: true, install: true) {
