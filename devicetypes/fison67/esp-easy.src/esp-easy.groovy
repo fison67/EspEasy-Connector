@@ -1,5 +1,5 @@
 /**
- *  ESP Easy DTH (v.0.0.3)
+ *  ESP Easy DTH (v.0.0.4)
  *
  *  Authors
  *   - fison67@nate.com
@@ -27,6 +27,7 @@ metadata {
         capability "Carbon Dioxide Measurement"
         capability "Dust Sensor"
         capability "Color Temperature"
+		capability "Dust Sensor" // fineDustLevel : PM 2.5   dustLevel : PM 10
         capability "Refresh"
         
 		attribute "value1", "number"
@@ -188,14 +189,16 @@ def parse(String description) {
         sendEvent(name:"illuminance", value: value as int) 
     }else if(name == "ppm"){
         sendEvent(name:"carbonDioxide", value: value as double)
-    }else if(name == "dust"){
+    }else if(name == "pm2.5"){
     	sendEvent(name:"fineDustLevel", value: value as int)
+    }else if(name == "pm10"){
+    	sendEvent(name:"dustLevel", value: value as int)
     }else if(name == "color temperature"){
     	sendEvent(name:"colorTemperature", value: value as int)
     }
     
     def count = state['unique_' + name]
-    sendEvent(name: "status${count}", value: value, displayed: false)
+    sendEvent(name: "value${count}", value: value, displayed: false)
     
     updateLastTime()
 }
@@ -244,8 +247,10 @@ def setData(data){
     									sendEvent(name:"illuminance", value: subValue)
                                     }else if(key.toLowerCase() == "ppm"){
     									sendEvent(name:"carbonDioxide", value: subValue)
-                                    }else if(key.toLowerCase() == "dust"){
+                                    }else if(key.toLowerCase() == "pm2.5"){
                                         sendEvent(name:"fineDustLevel", value: subValue)
+                                    }else if(key.toLowerCase() == "pm10"){
+                                        sendEvent(name:"dustLevel", value: subValue)
                                     }else if(key.toLowerCase() == "color temperature"){
                                         sendEvent(name:"colorTemperature", value: subValue)
                                     }
