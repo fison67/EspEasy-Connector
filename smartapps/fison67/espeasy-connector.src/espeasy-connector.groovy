@@ -1,5 +1,5 @@
 /**
- *  ESP Easy Connector (v.0.0.2)
+ *  ESP Easy Connector (v.0.0.3)
  *
  *  Authors
  *   - fison67@nate.com
@@ -65,7 +65,7 @@ def addPage(){
     state.mode = "manual"
 	dynamicPage(name:"addPage", title:"Add Page", nextPage: "donePage") {
 		section("Fill the blank") {
-        	input "devAddress", "string", title: "IP Address of ESP Easy", required: true
+        	input "devAddress", "text", title: "IP Address of ESP Easy", required: true
         	input "devAutoRefreshMode", "enum", title: "Auto Refresh Mode?", required: true, options: ["ON", "OFF"], description: "ON : DTH directly requests data.\nOFF : DTH is just receive data from Esp Easy"
         }
 	}
