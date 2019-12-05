@@ -1,5 +1,5 @@
 /**
- *  ESP Easy DTH (v.0.0.4)
+ *  ESP Easy DTH (v.0.0.5)
  *
  *  Authors
  *   - fison67@nate.com
@@ -15,24 +15,28 @@
  *  for the specific language governing permissions and limitations under the License.
  *
  */
- 
+  
 import groovy.json.JsonSlurper
 
 metadata {
 	definition (name: "ESP Easy", namespace: "fison67", author: "fison67") {
         capability "Sensor"
+        capability "Motion Sensor"
         capability "Temperature Measurement"
         capability "Relative Humidity Measurement"
         capability "Illuminance Measurement"
         capability "Carbon Dioxide Measurement"
+        capability "Dust Sensor"
         capability "Color Temperature"
-	capability "Dust Sensor" // fineDustLevel : PM 2.5   dustLevel : PM 10
+		capability "Dust Sensor" // fineDustLevel : PM 2.5   dustLevel : PM 10
         capability "Refresh"
         
 		attribute "value1", "number"
 		attribute "value2", "number"
 		attribute "value3", "number"
 		attribute "value4", "number"
+		attribute "value5", "number"
+		attribute "value6", "number"
         attribute "lastCheckinDate", "date"
         
         command "setData"
@@ -194,6 +198,8 @@ def parse(String description) {
     	sendEvent(name:"dustLevel", value: value as int)
     }else if(name == "color temperature"){
     	sendEvent(name:"colorTemperature", value: value as int)
+    }else if(name == "motion"){
+    	sendEvent(name:"motion", value: (value as int) == 0 ? "inactive" : "active")
     }
     
     def count = state['unique_' + name]
@@ -252,6 +258,8 @@ def setData(data){
                                         sendEvent(name:"dustLevel", value: subValue)
                                     }else if(key.toLowerCase() == "color temperature"){
                                         sendEvent(name:"colorTemperature", value: subValue)
+                                    }else if(key.toLowerCase() == "motion"){
+                                        sendEvent(name:"motion", value: (subValue == 0 ? "inactive" : "active"))
                                     }
                                     sendEvent(name: "status${count}", value: subValue, displayed: false)
                                 }
