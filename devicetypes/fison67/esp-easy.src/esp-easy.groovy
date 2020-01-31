@@ -26,7 +26,6 @@ metadata {
         capability "Relative Humidity Measurement"
         capability "Illuminance Measurement"
         capability "Carbon Dioxide Measurement"
-        capability "Dust Sensor"
         capability "Color Temperature"
 		capability "Dust Sensor" // fineDustLevel : PM 2.5   dustLevel : PM 10
         capability "Refresh"
